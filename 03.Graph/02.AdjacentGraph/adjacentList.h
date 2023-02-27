@@ -19,6 +19,7 @@ typedef struct {
 // 使用邻接表描述的图
 typedef struct {
 	ArcNode *nodes;			// 图中顶点的集合
+	int *visited;			// 图中顶点访问的标记
 	int nodeNum;			// 图中顶点的个数
 	int edgeNum;			// 图中边的个数
 	int directed;			// 是否有向
@@ -30,4 +31,12 @@ void releaseAGraph(AGraph *graph);
  * */
 void initAGraph(AGraph *graph, int num, char *names[], int directed);
 void addAGraphEdge(AGraph *graph, int x, int y, int w);
+// 复位访问信息
+void resetAGraphVisited(AGraph *graph);
+// 访问节点
+void visitAGraphNode(ArcNode *node);
+// 深度搜索
+void DFSAGraphTravel(AGraph *graph, int v);
+// 广度搜索
+void BFSAGraphTravel(AGraph *graph, int v);
 #endif
