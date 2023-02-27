@@ -12,7 +12,8 @@ AGraph *createAGraph(int n) {
 	graph->edgeNum = 0;
 	graph->nodeNum = n;
 	graph->nodes = (ArcNode *) malloc(sizeof(ArcNode) * n);
-	if (graph->nodes == NULL) {
+	graph->visited = (int *) malloc(sizeof(int ) * n);
+	if (graph->nodes == NULL || graph->visited == NULL) {
 		fprintf(stderr, "malloc node failed!\n");
 		free(graph);
 		return NULL;
@@ -35,6 +36,9 @@ void releaseAGraph(AGraph *graph) {
 				count++;
 			}
 		}
+		free(graph->nodes);
+		free(graph->visited);
+		free(graph);
 		printf("release %d edges!\n", count);
 	}
 }
@@ -73,4 +77,55 @@ void addAGraphEdge(AGraph *graph, int x, int y, int w) {
 		graph->nodes[y].firstEdge = edge;
 		graph->edgeNum++;
 	}
+}
+
+void visitAGraphNode(ArcNode *node) {
+	printf("\t%s", node->show);
+}
+
+void DFSAGraphTravel(AGraph *graph, int v) {
+	ArcEdge *p;
+	// 先访问v节点，遍历v节点中的其他边的情况，找到下一个节点，再递进去
+	graph->visited[v] = 1;
+	visitAGraphNode(&graph->nodes[v]);
+	p = graph->nodes[v].firstEdge;
+	while (p) {
+		if (graph->visited[p->no] == 0) {
+			DFSAGraphTravel(graph, p->no);
+		}
+		p = p->next;
+	}
+}
+
+void resetAGraphVisited(AGraph *graph) {
+	if (graph && graph->visited) {
+		memset(graph->visited, 0, sizeof(int ) * graph->nodeNum);
+	}
+}
+
+void BFSAGraphTravel(AGraph *graph, int v) {
+	int *que = (int *) malloc(sizeof(int ) * graph->nodeNum);
+	int front = 0, rear = 0;
+	int cur;
+	ArcEdge *p;
+
+	rear = (rear + 1) % graph->nodeNum;
+	que[rear] = v;
+	while (front != rear) {
+		front = (front + 1) % graph->nodeNum;
+		cur = que[front];
+		visitAGraphNode(&graph->nodes[cur]);
+		graph->visited[cur] = 1;
+
+		p = graph->nodes[cur].firstEdge;
+		while (p) {		// 把当前的任务都加入队列
+			if (graph->visited[p->no] == 0) {
+				rear = (rear + 1) % graph->nodeNum;
+				que[rear] = p->no;
+				graph->visited[p->no] = 1;
+			}
+			p = p->next;
+		}
+	}
+	free(que);
 }
